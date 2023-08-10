@@ -26,9 +26,8 @@ export function parseFormData<T extends TObject>(
           parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
         );
       } else {
-        const entry = entries[0];
-        if (entry !== "") {
-          value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
+        if (entries[0] !== "") {
+          value = parseFormEntry(entries[0], fieldInfo.fieldType, fieldInfo);
         }
       }
     }
