@@ -1,0 +1,48 @@
+{
+  "name": "typebox-form-data",
+  "version": "0.1.0",
+  "author": "Joseph T. Lapp <arachnojoe@gmail.com>",
+  "license": "MIT",
+  "description": "Parses form and query parameter data based on TypeBox schemas",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jtlapp/typebox-form-data"
+  },
+  "keywords": [
+    "typebox",
+    "formdata",
+    "form",
+    "forms",
+    "query parameters",
+    "parse",
+    "parser"
+  ],
+  "type": "module",
+  "main": "dist/cjs/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "source": "src/index.ts",
+  "files": [
+    "dist/**"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rdf dist && tsc && tsc -p tsconfig.cjs.json && pnpm write-packages",
+    "write-packages": "echo '{\"type\":\"module\"}' > dist/esm/package.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "clean": "rm -rdf dist && rm -rdf node_modules",
+    "test": "vitest --run"
+  },
+  "devDependencies": {
+    "@types/node": "20.1.3",
+    "typescript": "5.1.3",
+    "vite": "^4.3.6",
+    "vitest": "^0.32.2"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.30.2"
+  }
+}
