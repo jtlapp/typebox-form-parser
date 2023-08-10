@@ -98,11 +98,16 @@ function createFieldInfo(
     memberType = getArrayMemberType(schema as TArray);
   }
 
-  if (typeBoxType === TypeBoxType.Boolean && (isNullable || isOptional)) {
-    throw Error("Form booleans (checkboxes) can't be nullable or optional");
-  }
-  if (isNullable && isOptional) {
-    throw Error("Form types can't be both optional and nullable");
+  if (isNullable || isOptional) {
+    if (typeBoxType === TypeBoxType.Boolean) {
+      throw Error("Form booleans (checkboxes) can't be nullable or optional");
+    }
+    if (hasDefault) {
+      throw Error("Optional and nullable form types can't have default values");
+    }
+    if (isOptional && isNullable) {
+      throw Error("Form types can't be both optional and nullable");
+    }
   }
 
   return {

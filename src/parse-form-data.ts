@@ -28,7 +28,11 @@ export function parseFormData<T extends TObject>(
       } else {
         value = fieldInfo.hasDefault
           ? fieldInfo.defaultValue
-          : defaultValueForType(fieldInfo);
+          : fieldInfo.isNullable
+          ? null
+          : fieldInfo.isOptional
+          ? undefined
+          : [];
       }
     } else {
       const entry = entries[0];
