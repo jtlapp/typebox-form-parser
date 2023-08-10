@@ -19,6 +19,10 @@ const schema1 = Type.Object({
   agree: Type.Boolean(),
 });
 
+const schema2 = Type.Object({
+  agree: Type.Boolean(),
+});
+
 // const schema1WithDefaults = Type.Object({
 //   name: Type.String({ minLength: 2, default: "Jane" }),
 //   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
@@ -102,46 +106,31 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "detect a boolean with a value",
-    schema: schema1,
+    schema: schema2,
     submitted: {
-      name: "Jane",
-      age: 50,
       agree: "neither-false-nor-off",
     },
     parsed: {
-      name: "Jane",
-      age: 50,
-      email: null,
       agree: true,
     },
   },
   {
     description: "detect a 'false' boolean",
-    schema: schema1,
+    schema: schema2,
     submitted: {
-      name: "Jane",
-      age: 50,
       agree: "false",
     },
     parsed: {
-      name: "Jane",
-      age: 50,
-      email: null,
       agree: false,
     },
   },
   {
     description: "detect an 'off' boolean",
-    schema: schema1,
+    schema: schema2,
     submitted: {
-      name: "Jane",
-      age: 50,
       agree: "off",
     },
     parsed: {
-      name: "Jane",
-      age: 50,
-      email: null,
       agree: false,
     },
   },
