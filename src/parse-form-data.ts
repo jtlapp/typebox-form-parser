@@ -65,7 +65,9 @@ function parseFormValue(
   } else if (fieldType == JavaScriptType.Number) {
     return parseFloat(value);
   } else if (fieldType == JavaScriptType.Boolean) {
-    return Boolean(value == "false" ? "" : value).valueOf();
+    // Boolean fields normally only appear in the form when true, but handle
+    // case where the client is explicitly setting a "false" or "off" value.
+    return value !== "false" && value !== "off";
   } else if (fieldType == JavaScriptType.Date) {
     return new Date(value);
   } else if (fieldType == JavaScriptType.Array) {

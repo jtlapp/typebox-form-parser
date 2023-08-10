@@ -81,6 +81,25 @@ const testEntries: TestEntry[] = [
       agree: false,
     },
   },
+  {
+    description: "providing only invalid types",
+    schema: schema1,
+    submitted: {
+      name: 123,
+      nickname: null,
+      age: "foo",
+      siblings: "bar",
+      email: 456,
+      agree: null,
+    },
+    parsed: {
+      name: "123",
+      age: NaN,
+      siblings: NaN,
+      email: "456",
+      agree: false,
+    },
+  },
 ];
 
 describe("parseFormData", () => {
