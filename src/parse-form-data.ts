@@ -1,3 +1,5 @@
+// inspired by https://github.com/ciscoheat/sveltekit-superforms/blob/main/src/lib/superValidate.ts
+
 import type { Static, TObject } from "@sinclair/typebox";
 
 import {
@@ -22,11 +24,18 @@ export function parseFormData<T extends TObject>(
         parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
       );
     } else {
-      output[fieldName] = parseFormEntry(
-        entries[0],
-        fieldInfo.fieldType,
-        fieldInfo
-      );
+      const entry = entries[0];
+      if (entry === "" || entry === undefined) {
+        output[fieldName] = fieldInfo.hasDefault
+          ? fieldInfo.defaultValue
+          : defaultValueForType(fieldInfo);
+      } else {
+        output[fieldName] = parseFormEntry(
+          entry,
+          fieldInfo.fieldType,
+          fieldInfo
+        );
+      }
     }
   }
 
@@ -49,12 +58,6 @@ function parseFormValue(
   fieldType: JavaScriptType,
   fieldInfo: FieldInfo
 ): unknown {
-  if (value === "") {
-    return fieldInfo.hasDefault
-      ? fieldInfo.defaultValue
-      : defaultValueForType(fieldInfo);
-  }
-
   if (fieldType == JavaScriptType.String) {
     return value;
   } else if (fieldType == JavaScriptType.Integer) {

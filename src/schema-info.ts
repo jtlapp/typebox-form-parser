@@ -1,3 +1,5 @@
+// inspired by https://github.com/ciscoheat/sveltekit-superforms/blob/main/src/lib/schemaEntity.ts
+
 import type { TArray, TLiteral, TSchema, TUnion } from "@sinclair/typebox";
 import { Kind, Optional } from "@sinclair/typebox";
 
