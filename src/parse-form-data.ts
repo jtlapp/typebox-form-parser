@@ -20,16 +20,16 @@ export function parseFormData<T extends TObject>(
     const entries = formData.getAll(fieldName);
     let value: unknown;
 
-    if (fieldInfo.fieldType == JavaScriptType.Array) {
-      if (entries.length !== 0) {
+    if (entries.length !== 0) {
+      if (fieldInfo.fieldType == JavaScriptType.Array) {
         value = entries.map((entry) =>
           parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
         );
-      }
-    } else {
-      const entry = entries[0];
-      if (entry !== "" && entry !== undefined) {
-        value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
+      } else {
+        const entry = entries[0];
+        if (entry !== "") {
+          value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
+        }
       }
     }
     output[fieldName] =
