@@ -9,10 +9,13 @@ const schema1 = Type.Object({
   nickname: Type.Optional(Type.String({ minLength: 2 })),
   age: Type.Number({ minimum: 13, errorMessage: "Must be a number >= 13" }),
   siblings: Type.Optional(Type.Integer({ minimum: 0 })),
-  email: Type.String({
-    pattern: "^[a-z]+@[a-z]+[.][a-z]+$",
-    minLength: 10,
-  }),
+  email: Type.Union([
+    Type.String({
+      pattern: "^[a-z]+@[a-z]+[.][a-z]+$",
+      minLength: 10,
+    }),
+    Type.Null(),
+  ]),
   agree: Type.Boolean(),
 });
 
@@ -66,17 +69,16 @@ const testEntries: TestEntry[] = [
     parsed: null,
   },
   {
-    description: "boolean defaulting to false if not provided",
+    description: "booleans/nullables default to false/null",
     schema: schema1,
     submitted: {
       name: "Jane",
       age: 50,
-      email: "jane@example.com",
     },
     parsed: {
       name: "Jane",
       age: 50,
-      email: "jane@example.com",
+      email: null,
       agree: false,
     },
   },
@@ -88,6 +90,19 @@ describe("parseFormData", () => {
       testFormData(entry);
     });
   }
+
+  ignore("verify result type", () => {
+    const schemaInfo = getSchemaInfo(schema1);
+    const result: {
+      name: string;
+      nickname?: string;
+      age: number;
+      siblings?: number;
+      email: string | null;
+      agree: boolean;
+    } = parseFormData({} as FormData, schemaInfo);
+    return result; // suppress unused variable warning
+  });
 });
 
 function testFormData(entry: TestEntry): void {
@@ -113,3 +128,5 @@ function testFormData(entry: TestEntry): void {
 
   expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
 }
+
+export function ignore(_description: string, _: () => void) {}

@@ -62,13 +62,11 @@ export function getSchemaInfo<T extends TSchema>(schema: T): SchemaInfo<T> {
 }
 
 export function defaultValueForType(fieldInfo: FieldInfo): unknown {
-  return fieldInfo.isOptional
-    ? undefined
-    : fieldInfo.isNullable
+  return fieldInfo.isNullable
     ? null
     : fieldInfo.fieldType == JavaScriptType.Boolean
     ? false
-    : "";
+    : undefined;
 }
 
 function createFieldInfo(fieldName: string | null, schema: TSchema): FieldInfo {
