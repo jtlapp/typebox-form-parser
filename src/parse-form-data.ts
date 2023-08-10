@@ -25,7 +25,11 @@ export function parseFormData<T extends TObject>(
         value = entries.map((entry) =>
           parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
         );
-      } else if (!fieldInfo.isOptional && !fieldInfo.isNullable) {
+      } else if (
+        !fieldInfo.isOptional &&
+        !fieldInfo.isNullable &&
+        !fieldInfo.hasDefault
+      ) {
         value = [];
       }
     } else {

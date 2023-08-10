@@ -30,6 +30,10 @@ const arraySchema = Type.Object({
   bigints: Type.Union([Type.Array(Type.BigInt()), Type.Null()]),
 });
 
+const defaultArraySchema = Type.Object({
+  strings: Type.Array(Type.String(), { default: ["abc", "def"] }),
+});
+
 // const normalSchemaWithDefaults = Type.Object({
 //   name: Type.String({ minLength: 2, default: "Jane" }),
 //   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
@@ -164,6 +168,14 @@ const testEntries: TestEntry[] = [
       strings: [],
       ints: [123],
       bigints: null,
+    },
+  },
+  {
+    description: "handling default values for arrays",
+    schema: defaultArraySchema,
+    submitted: {},
+    parsed: {
+      strings: ["abc", "def"],
     },
   },
 ];
