@@ -152,6 +152,19 @@ const testEntries: TestEntry[] = [
     },
     parsed: null,
   },
+  {
+    description: "handling empty, singular, nullable, and optional arrays",
+    schema: arraySchema,
+    submitted: {
+      strings: [],
+      ints: [123],
+      bigints: null,
+    },
+    parsed: {
+      ints: [123],
+      bigints: null,
+    },
+  },
 ];
 
 describe("parseFormData", () => {

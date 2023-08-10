@@ -18,14 +18,20 @@ export function parseFormData<T extends TObject>(
   for (const fieldName of schemaInfo.fieldNames) {
     const fieldInfo = schemaInfo.fields[fieldName];
     const entries = formData.getAll(fieldName);
+    let value: unknown;
 
     if (fieldInfo.fieldType == JavaScriptType.Array) {
-      output[fieldName] = entries.map((entry) =>
-        parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
-      );
+      if (entries.length !== 0) {
+        value = entries.map((entry) =>
+          parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
+        );
+      } else {
+        value = fieldInfo.hasDefault
+          ? fieldInfo.defaultValue
+          : defaultValueForType(fieldInfo);
+      }
     } else {
       const entry = entries[0];
-      let value: unknown;
       if (entry === "" || entry === undefined) {
         value = fieldInfo.hasDefault
           ? fieldInfo.defaultValue
@@ -33,9 +39,9 @@ export function parseFormData<T extends TObject>(
       } else {
         value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
       }
-      if (value !== undefined) {
-        output[fieldName] = value;
-      }
+    }
+    if (value !== undefined) {
+      output[fieldName] = value;
     }
   }
 
