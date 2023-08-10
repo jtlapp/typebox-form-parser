@@ -100,6 +100,51 @@ const testEntries: TestEntry[] = [
       agree: false,
     },
   },
+  {
+    description: "detect a boolean with a value",
+    schema: schema1,
+    submitted: {
+      name: "Jane",
+      age: 50,
+      agree: "neither-false-nor-off",
+    },
+    parsed: {
+      name: "Jane",
+      age: 50,
+      email: null,
+      agree: true,
+    },
+  },
+  {
+    description: "detect a 'false' boolean",
+    schema: schema1,
+    submitted: {
+      name: "Jane",
+      age: 50,
+      agree: "false",
+    },
+    parsed: {
+      name: "Jane",
+      age: 50,
+      email: null,
+      agree: false,
+    },
+  },
+  {
+    description: "detect an 'off' boolean",
+    schema: schema1,
+    submitted: {
+      name: "Jane",
+      age: 50,
+      agree: "off",
+    },
+    parsed: {
+      name: "Jane",
+      age: 50,
+      email: null,
+      agree: false,
+    },
+  },
 ];
 
 describe("parseFormData", () => {
