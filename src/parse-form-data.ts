@@ -25,25 +25,19 @@ export function parseFormData<T extends TObject>(
         value = entries.map((entry) =>
           parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
         );
-      } else {
-        value = fieldInfo.hasDefault
-          ? fieldInfo.defaultValue
-          : fieldInfo.isNullable
-          ? null
-          : fieldInfo.isOptional
-          ? undefined
-          : [];
+      } else if (!fieldInfo.isOptional && !fieldInfo.isNullable) {
+        value = [];
       }
     } else {
       const entry = entries[0];
       if (entry !== "" && entry !== undefined) {
         value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
       }
-      if (value === undefined) {
-        value = fieldInfo.hasDefault
-          ? fieldInfo.defaultValue
-          : defaultValueForType(fieldInfo);
-      }
+    }
+    if (value === undefined) {
+      value = fieldInfo.hasDefault
+        ? fieldInfo.defaultValue
+        : defaultValueForType(fieldInfo);
     }
     if (value !== undefined) {
       output[fieldName] = value;
