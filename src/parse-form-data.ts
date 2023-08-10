@@ -36,22 +36,17 @@ export function parseFormData<T extends TObject>(
       }
     } else {
       const entry = entries[0];
-      if (entry === "" || entry === undefined) {
+      if (entry !== "" && entry !== undefined) {
+        value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
+      }
+      if (value === undefined) {
         value = fieldInfo.hasDefault
           ? fieldInfo.defaultValue
           : defaultValueForType(fieldInfo);
-      } else {
-        value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
       }
     }
-    if (value === undefined) {
-    } else {
-      output[fieldName] =
-        value !== undefined
-          ? value
-          : fieldInfo.hasDefault
-          ? fieldInfo.defaultValue
-          : defaultValueForType(fieldInfo);
+    if (value !== undefined) {
+      output[fieldName] = value;
     }
   }
 
