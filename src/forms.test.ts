@@ -161,6 +161,7 @@ const testEntries: TestEntry[] = [
       bigints: null,
     },
     parsed: {
+      strings: [],
       ints: [123],
       bigints: null,
     },

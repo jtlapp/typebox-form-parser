@@ -20,21 +20,35 @@ export function parseFormData<T extends TObject>(
     const entries = formData.getAll(fieldName);
     let value: unknown;
 
-    if (entries.length !== 0) {
-      if (fieldInfo.fieldType == JavaScriptType.Array) {
+    if (fieldInfo.fieldType == JavaScriptType.Array) {
+      if (entries.length !== 0) {
         value = entries.map((entry) =>
           parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
         );
-      } else if (entries[0] !== "") {
-        value = parseFormEntry(entries[0], fieldInfo.fieldType, fieldInfo);
+      } else {
+        value = fieldInfo.hasDefault
+          ? fieldInfo.defaultValue
+          : defaultValueForType(fieldInfo);
+      }
+    } else {
+      const entry = entries[0];
+      if (entry === "" || entry === undefined) {
+        value = fieldInfo.hasDefault
+          ? fieldInfo.defaultValue
+          : defaultValueForType(fieldInfo);
+      } else {
+        value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
       }
     }
-    output[fieldName] =
-      value !== undefined
-        ? value
-        : fieldInfo.hasDefault
-        ? fieldInfo.defaultValue
-        : defaultValueForType(fieldInfo);
+    if (value === undefined) {
+    } else {
+      output[fieldName] =
+        value !== undefined
+          ? value
+          : fieldInfo.hasDefault
+          ? fieldInfo.defaultValue
+          : defaultValueForType(fieldInfo);
+    }
   }
 
   return output;
