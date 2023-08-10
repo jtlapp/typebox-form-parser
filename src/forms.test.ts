@@ -7,7 +7,7 @@ import { getSchemaInfo } from "./schema-info.js";
 const schema1 = Type.Object({
   name: Type.String({ minLength: 2 }),
   nickname: Type.Optional(Type.String({ minLength: 2 })),
-  age: Type.Number({ minimum: 13, errorMessage: "Must be a number >= 13" }),
+  age: Type.Number({ minimum: 13 }),
   siblings: Type.Optional(Type.Integer({ minimum: 0 })),
   email: Type.Union([
     Type.String({
@@ -24,8 +24,7 @@ const schema1 = Type.Object({
 //   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
 //   age: Type.Number({
 //     minimum: 13,
-//     default: 50,
-//     errorMessage: "Must be a number >= 13",
+//     default: 50
 //   }),
 //   siblings: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
 //   email: Type.String({
