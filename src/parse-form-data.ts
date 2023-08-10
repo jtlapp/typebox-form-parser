@@ -25,10 +25,8 @@ export function parseFormData<T extends TObject>(
         value = entries.map((entry) =>
           parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
         );
-      } else {
-        if (entries[0] !== "") {
-          value = parseFormEntry(entries[0], fieldInfo.fieldType, fieldInfo);
-        }
+      } else if (entries[0] !== "") {
+        value = parseFormEntry(entries[0], fieldInfo.fieldType, fieldInfo);
       }
     }
     output[fieldName] =
