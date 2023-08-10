@@ -171,7 +171,7 @@ const testEntries: TestEntry[] = [
     },
   },
   {
-    description: "handling default values for arrays",
+    description: "handling arrays with default value",
     schema: defaultArraySchema,
     submitted: {},
     parsed: {
