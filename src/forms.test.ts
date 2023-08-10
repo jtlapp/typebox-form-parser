@@ -34,6 +34,28 @@ const defaultArraySchema = Type.Object({
   strings: Type.Array(Type.String(), { default: ["abc", "def"] }),
 });
 
+const unionOfArraysSchema = Type.Object({
+  requiredList: Type.Union([
+    Type.Array(Type.Union([Type.Literal("foo"), Type.Literal("bar")])),
+    Type.Array(Type.Union([Type.Literal("boo"), Type.Literal("baz")])),
+  ]),
+  nullableList: Type.Union([
+    Type.Array(Type.Union([Type.Literal("foo"), Type.Literal("bar")])),
+    Type.Array(Type.Union([Type.Literal("boo"), Type.Literal("baz")])),
+    Type.Null(),
+  ]),
+  optionalList: Type.Optional(
+    Type.Union([
+      Type.Array(Type.Union([Type.Literal("foo"), Type.Literal("bar")])),
+      Type.Array(Type.Union([Type.Literal("boo"), Type.Literal("baz")])),
+    ])
+  ),
+});
+
+const badUnionOfArraysSchema = Type.Object({
+  list: Type.Union([Type.Array(Type.String()), Type.Array(Type.Number())]),
+});
+
 // const normalSchemaWithDefaults = Type.Object({
 //   name: Type.String({ minLength: 2, default: "Jane" }),
 //   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
@@ -55,6 +77,7 @@ interface TestEntry {
   schema: TObject;
   submitted: object;
   parsed: object | null;
+  error?: string;
 }
 
 const testEntries: TestEntry[] = [
@@ -178,6 +201,43 @@ const testEntries: TestEntry[] = [
       strings: ["abc", "def"],
     },
   },
+  {
+    description: "handling a valid unions of arrays, all lists provided",
+    schema: unionOfArraysSchema,
+    submitted: {
+      requiredList: ["boo", "baz"],
+      nullableList: ["foo", "bar"],
+      optionalList: ["boo", "baz"],
+    },
+    parsed: {
+      requiredList: ["boo", "baz"],
+      nullableList: ["foo", "bar"],
+      optionalList: ["boo", "baz"],
+    },
+  },
+  {
+    description: "handling a valid unions of arrays, all edge cases",
+    schema: unionOfArraysSchema,
+    submitted: {
+      requiredList: [],
+      nullableList: null,
+    },
+    parsed: {
+      requiredList: [],
+      nullableList: null,
+    },
+  },
+  {
+    description: "handling an invalid unions of arrays",
+    schema: badUnionOfArraysSchema,
+    submitted: {
+      list: ["foo", "bar"],
+    },
+    parsed: {
+      list: ["foo", "bar"],
+    },
+    error: "JavaScript type",
+  },
 ];
 
 describe("parseFormData", () => {
@@ -202,8 +262,6 @@ describe("parseFormData", () => {
 });
 
 function testFormData(entry: TestEntry): void {
-  // Construct FormData for the provided data.
-
   const formData = new FormData();
   for (const [key, value] of Object.entries(entry.submitted)) {
     if (Array.isArray(value)) {
@@ -215,14 +273,13 @@ function testFormData(entry: TestEntry): void {
     }
   }
 
-  // Parse the FormData.
-
-  const schemaInfo = getSchemaInfo(entry.schema);
-  const parsedData = parseFormData(formData, schemaInfo);
-
-  // Verify the parsed data.
-
-  expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
+  if (entry.error) {
+    expect(() => getSchemaInfo(entry.schema)).toThrow(entry.error);
+  } else {
+    const schemaInfo = getSchemaInfo(entry.schema);
+    const parsedData = parseFormData(formData, schemaInfo);
+    expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
+  }
 }
 
 export function ignore(_description: string, _: () => void) {}

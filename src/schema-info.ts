@@ -151,7 +151,14 @@ function getUnionInfo(
         );
       }
       if (fieldType === JavaScriptType.Array) {
-        memberType = getArrayMemberType(memberSchema as TArray);
+        const nextMemberType = getArrayMemberType(memberSchema as TArray);
+        if (memberType === null) {
+          memberType = nextMemberType;
+        } else if (memberType !== nextMemberType) {
+          throw Error(
+            "All members of arrays in unions must have the same JavaScript type"
+          );
+        }
       }
     }
   }
