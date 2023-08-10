@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 import { parseFormData } from "./parse-form-data.js";
 import { getSchemaInfo } from "./schema-info.js";
 
-const schema1 = Type.Object({
+const normalSchema = Type.Object({
   name: Type.String({ minLength: 2 }),
   nickname: Type.Optional(Type.String({ minLength: 2 })),
   age: Type.Number({ minimum: 13 }),
@@ -19,11 +19,18 @@ const schema1 = Type.Object({
   agree: Type.Boolean(),
 });
 
-const schema2 = Type.Object({
+const booleanSchema = Type.Object({
   agree: Type.Boolean(),
 });
 
-// const schema1WithDefaults = Type.Object({
+const arraySchema = Type.Object({
+  strings: Type.Array(Type.String()),
+  ints: Type.Array(Type.Integer()),
+  bools: Type.Optional(Type.Array(Type.Boolean())),
+  bigints: Type.Union([Type.Array(Type.BigInt()), Type.Null()]),
+});
+
+// const normalSchemaWithDefaults = Type.Object({
 //   name: Type.String({ minLength: 2, default: "Jane" }),
 //   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
 //   age: Type.Number({
@@ -49,7 +56,7 @@ interface TestEntry {
 const testEntries: TestEntry[] = [
   {
     description: "providing all values",
-    schema: schema1,
+    schema: normalSchema,
     submitted: {
       name: "Jane",
       nickname: "Janey",
@@ -62,7 +69,7 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "providing only required values",
-    schema: schema1,
+    schema: normalSchema,
     submitted: {
       name: "Jane",
       age: 50,
@@ -73,7 +80,7 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "booleans/nullables default to false/null",
-    schema: schema1,
+    schema: normalSchema,
     submitted: {
       name: "Jane",
       age: 50,
@@ -87,7 +94,7 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "providing only invalid types",
-    schema: schema1,
+    schema: normalSchema,
     submitted: {
       name: 123,
       nickname: null,
@@ -106,7 +113,7 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "detect a boolean with a value",
-    schema: schema2,
+    schema: booleanSchema,
     submitted: {
       agree: "neither-false-nor-off",
     },
@@ -116,7 +123,7 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "detect a 'false' boolean",
-    schema: schema2,
+    schema: booleanSchema,
     submitted: {
       agree: "false",
     },
@@ -126,13 +133,24 @@ const testEntries: TestEntry[] = [
   },
   {
     description: "detect an 'off' boolean",
-    schema: schema2,
+    schema: booleanSchema,
     submitted: {
       agree: "off",
     },
     parsed: {
       agree: false,
     },
+  },
+  {
+    description: "duplicate field handling (arrays)",
+    schema: arraySchema,
+    submitted: {
+      strings: ["foo", "bar"],
+      ints: [123, 456, 789],
+      bools: [true, false, true],
+      bigints: [BigInt(123), BigInt(456)],
+    },
+    parsed: null,
   },
 ];
 
@@ -144,7 +162,7 @@ describe("parseFormData", () => {
   }
 
   ignore("verify result type", () => {
-    const schemaInfo = getSchemaInfo(schema1);
+    const schemaInfo = getSchemaInfo(normalSchema);
     const result: {
       name: string;
       nickname?: string;

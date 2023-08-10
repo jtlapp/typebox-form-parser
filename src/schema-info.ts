@@ -38,7 +38,8 @@ export function getSchemaInfo<T extends TSchema>(schema: T): SchemaInfo<T> {
     for (const fieldName of fieldNames) {
       fields[fieldName] = createFieldInfo(
         fieldName,
-        schema.properties[fieldName]
+        schema.properties[fieldName],
+        false
       );
     }
 
@@ -69,7 +70,11 @@ export function defaultValueForType(fieldInfo: FieldInfo): unknown {
     : undefined;
 }
 
-function createFieldInfo(fieldName: string | null, schema: TSchema): FieldInfo {
+function createFieldInfo(
+  fieldName: string | null,
+  schema: TSchema,
+  withinArray: boolean
+): FieldInfo {
   const typeBoxType = schema[Kind] as TypeBoxType;
   let fieldType = schema.type as JavaScriptType;
   let memberType: JavaScriptType | null = null;
@@ -78,13 +83,19 @@ function createFieldInfo(fieldName: string | null, schema: TSchema): FieldInfo {
   const hasDefault = schema.default !== undefined;
 
   if (typeBoxType === TypeBoxType.Union) {
-    [fieldType, isNullable] = getUnionInfo(schema as TUnion);
+    [fieldType, isNullable, memberType] = getUnionInfo(
+      schema as TUnion,
+      withinArray
+    );
   } else if (typeBoxType === TypeBoxType.Null) {
     isNullable = true;
   } else if (typeBoxType === TypeBoxType.Literal) {
     fieldType = (schema as TLiteral).type as JavaScriptType;
   } else if (typeBoxType === TypeBoxType.Array) {
-    memberType = (schema as TArray).items.type as JavaScriptType;
+    if (withinArray) {
+      throw Error("Form arrays can't themselves contain arrays");
+    }
+    memberType = getArrayMemberType(schema as TArray);
   }
 
   if (typeBoxType === TypeBoxType.Boolean && (isNullable || isOptional)) {
@@ -105,12 +116,25 @@ function createFieldInfo(fieldName: string | null, schema: TSchema): FieldInfo {
   };
 }
 
-function getUnionInfo(schema: TUnion): [JavaScriptType, boolean] {
+function getArrayMemberType(schema: TArray) {
+  const memberInfo = createFieldInfo(null, schema.items, true);
+  if (memberInfo.isNullable || memberInfo.isOptional) {
+    throw Error("Form arrays can't contain nullable or optional members");
+  }
+  return memberInfo.fieldType;
+}
+
+function getUnionInfo(
+  schema: TUnion,
+  withinArray: boolean
+): [JavaScriptType, boolean, JavaScriptType | null] {
   let fieldType: JavaScriptType | undefined = undefined;
   let isNullable = false;
+  let memberType: JavaScriptType | null = null;
 
   for (const memberSchema of schema.anyOf) {
-    const fieldInfo = createFieldInfo(null, memberSchema); // allows nested unions
+    // allows nested unions
+    const fieldInfo = createFieldInfo(null, memberSchema, withinArray);
     if (fieldInfo.isNullable) {
       isNullable = true;
     } else {
@@ -121,11 +145,14 @@ function getUnionInfo(schema: TUnion): [JavaScriptType, boolean] {
           "All non-null members of a union type must have the same JavaScript type"
         );
       }
+      if (fieldType === JavaScriptType.Array) {
+        memberType = getArrayMemberType(memberSchema as TArray);
+      }
     }
   }
 
   if (fieldType === undefined) {
     throw Error("Union type must have at least one non-null member");
   }
-  return [fieldType, isNullable];
+  return [fieldType, isNullable, memberType];
 }

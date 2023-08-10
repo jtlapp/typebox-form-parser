@@ -13,3 +13,4 @@ Parses form and query parameter data based on TypeBox schemas
 - Nullable values default to null.
 - Numeric, date, and string values only have defaults when the schema provides them/
 - Empty strings are interpreted as not being provided and therefore must map to `undefined` to pass validation, unless the schema provides a default. This is because there is no way to distinguish empty strings from optional strings.
+- Form arrays can't contain nullable or optional members, and they can't contain nested arrays.
