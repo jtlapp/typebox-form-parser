@@ -18,4 +18,4 @@ Parses form and query parameter data based on TypeBox schemas
 - Booleans cannot be optional or nullable; they always evaluate to either `true` or `false`.
 - The boolean form values `"false"`, `"off"`, and empty string are interpreted as `false`; all other values are interpreted as `true`. The absence of a form value for a boolean is interpreted as `false`, unless the schema overrides with a default value.
 - Numeric, date, and string values only have defaults when the schema provides them.
-- Default dates must be represented as strings. Use ISO strings for preserve accuracy.
+- Default dates must be represented as strings, because TypeBox conforms to JSON schema. Use ISO strings for preserve accuracy.
