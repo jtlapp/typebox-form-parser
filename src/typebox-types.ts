@@ -20,7 +20,7 @@ export enum JavaScriptType {
   Array = "array",
   BigInt = "bigint",
   Boolean = "boolean",
-  Date = "date",
+  Date = "Date",
   Integer = "integer",
   Null = "null",
   Number = "number",
