@@ -72,15 +72,14 @@ const badUnionOfArraysSchema = Type.Object({
 //   agree: Type.Boolean({ default: true }),
 // });
 
-interface TestEntry {
+interface ValidTestEntry {
   description: string;
   schema: TObject;
   submitted: object;
   parsed: object | null;
-  error?: string;
 }
 
-const testEntries: TestEntry[] = [
+const validTestEntries: ValidTestEntry[] = [
   {
     description: "providing all values",
     schema: normalSchema,
@@ -227,23 +226,32 @@ const testEntries: TestEntry[] = [
       nullableList: null,
     },
   },
+];
+
+interface InvalidTestEntry {
+  description: string;
+  schema: TObject;
+  error?: string;
+}
+
+const invalidTestEntries: InvalidTestEntry[] = [
   {
     description: "handling an invalid unions of arrays",
     schema: badUnionOfArraysSchema,
-    submitted: {
-      list: ["foo", "bar"],
-    },
-    parsed: {
-      list: ["foo", "bar"],
-    },
     error: "JavaScript type",
   },
 ];
 
 describe("parseFormData", () => {
-  for (const entry of testEntries) {
+  for (const entry of validTestEntries) {
     test(entry.description, () => {
-      testFormData(entry);
+      testValidFormData(entry);
+    });
+  }
+
+  for (const entry of invalidTestEntries) {
+    test(entry.description, () => {
+      expect(() => getSchemaInfo(entry.schema)).toThrow(entry.error);
     });
   }
 
@@ -261,7 +269,7 @@ describe("parseFormData", () => {
   });
 });
 
-function testFormData(entry: TestEntry): void {
+function testValidFormData(entry: ValidTestEntry): void {
   const formData = new FormData();
   for (const [key, value] of Object.entries(entry.submitted)) {
     if (Array.isArray(value)) {
@@ -273,13 +281,9 @@ function testFormData(entry: TestEntry): void {
     }
   }
 
-  if (entry.error) {
-    expect(() => getSchemaInfo(entry.schema)).toThrow(entry.error);
-  } else {
-    const schemaInfo = getSchemaInfo(entry.schema);
-    const parsedData = parseFormData(formData, schemaInfo);
-    expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
-  }
+  const schemaInfo = getSchemaInfo(entry.schema);
+  const parsedData = parseFormData(formData, schemaInfo);
+  expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
 }
 
 export function ignore(_description: string, _: () => void) {}
