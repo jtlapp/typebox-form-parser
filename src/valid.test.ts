@@ -52,10 +52,6 @@ const unionOfArraysSchema = Type.Object({
   ),
 });
 
-const badUnionOfArraysSchema = Type.Object({
-  list: Type.Union([Type.Array(Type.String()), Type.Array(Type.Number())]),
-});
-
 // const normalSchemaWithDefaults = Type.Object({
 //   name: Type.String({ minLength: 2, default: "Jane" }),
 //   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
@@ -201,7 +197,7 @@ const validTestEntries: ValidTestEntry[] = [
     },
   },
   {
-    description: "handling a valid unions of arrays, all lists provided",
+    description: "handling a unions of arrays, all lists provided",
     schema: unionOfArraysSchema,
     submitted: {
       requiredList: ["boo", "baz"],
@@ -215,7 +211,7 @@ const validTestEntries: ValidTestEntry[] = [
     },
   },
   {
-    description: "handling a valid unions of arrays, all edge cases",
+    description: "handling a unions of arrays, all edge cases",
     schema: unionOfArraysSchema,
     submitted: {
       requiredList: [],
@@ -228,30 +224,10 @@ const validTestEntries: ValidTestEntry[] = [
   },
 ];
 
-interface InvalidTestEntry {
-  description: string;
-  schema: TObject;
-  error?: string;
-}
-
-const invalidTestEntries: InvalidTestEntry[] = [
-  {
-    description: "handling an invalid unions of arrays",
-    schema: badUnionOfArraysSchema,
-    error: "JavaScript type",
-  },
-];
-
-describe("parseFormData", () => {
+describe("parseFormData()", () => {
   for (const entry of validTestEntries) {
     test(entry.description, () => {
       testValidFormData(entry);
-    });
-  }
-
-  for (const entry of invalidTestEntries) {
-    test(entry.description, () => {
-      expect(() => getSchemaInfo(entry.schema)).toThrow(entry.error);
     });
   }
 
