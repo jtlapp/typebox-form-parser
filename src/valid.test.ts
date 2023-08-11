@@ -86,7 +86,7 @@ const schemaWithDefaults = Type.Object({
     default: "def",
   }),
   list: Type.Array(Type.String(), { default: ["abc", "def"] }),
-  date: Type.Date({ default: DATE1 }),
+  date: Type.Date({ default: DATE1.toISOString() }),
 });
 
 interface ValidTestEntry {
@@ -287,9 +287,7 @@ const validTestEntries: ValidTestEntry[] = [
   {
     description: "explicit assignment of defaults",
     schema: schemaWithDefaults,
-    submitted: {
-      date: DATE1, // TODO: delete once TypeBox fixes default dates
-    },
+    submitted: {},
     parsed: {
       name: "Jane",
       age: 50,

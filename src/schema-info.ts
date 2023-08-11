@@ -80,7 +80,8 @@ function createFieldInfo(
   let memberType: JavaScriptType | null = null;
   let isNullable = false;
   const isOptional = schema[Optional] !== undefined;
-  const hasDefault = schema.default !== undefined;
+  let defaultValue = schema.default;
+  const hasDefault = defaultValue !== undefined;
 
   if (typeBoxType === TypeBoxType.Union) {
     [fieldType, isNullable, memberType] = getUnionInfo(
@@ -91,6 +92,10 @@ function createFieldInfo(
     isNullable = true;
   } else if (typeBoxType === TypeBoxType.Literal) {
     fieldType = (schema as TLiteral).type as JavaScriptType;
+  } else if (typeBoxType === TypeBoxType.Date) {
+    if (hasDefault) {
+      defaultValue = new Date(schema.default as string);
+    }
   } else if (typeBoxType === TypeBoxType.Array) {
     if (withinArray) {
       throw Error("Form arrays can't themselves contain arrays");
@@ -117,7 +122,7 @@ function createFieldInfo(
     isNullable,
     isOptional,
     hasDefault,
-    defaultValue: schema.default,
+    defaultValue,
   };
 }
 
