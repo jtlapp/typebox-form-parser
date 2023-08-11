@@ -87,11 +87,9 @@ function parseFormValue(
     } catch {
       return NaN;
     }
-  } else if (fieldType == JavaScriptType.Symbol) {
-    return Symbol(String(value));
   } else {
     throw Error(
-      `Type '${fieldType}' in '${
+      `Type '${fieldType}' in ${
         fieldInfo.fieldName ? "field " + fieldInfo.fieldName : "[array member]"
       } not supported`
     );

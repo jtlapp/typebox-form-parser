@@ -4,6 +4,9 @@ import { describe, expect, test } from "vitest";
 import { parseFormData } from "./parse-form-data.js";
 import { getSchemaInfo } from "./schema-info.js";
 
+const DATE1 = new Date();
+const DATE2 = new Date(DATE1.getTime() + 1000);
+
 const normalSchema = Type.Object({
   name: Type.String({ minLength: 2 }),
   nickname: Type.Optional(Type.String({ minLength: 2 })),
@@ -52,21 +55,39 @@ const unionOfArraysSchema = Type.Object({
   ),
 });
 
-// const normalSchemaWithDefaults = Type.Object({
-//   name: Type.String({ minLength: 2, default: "Jane" }),
-//   nickname: Type.Optional(Type.String({ minLength: 2, default: "Janey" })),
-//   age: Type.Number({
-//     minimum: 13,
-//     default: 50
-//   }),
-//   siblings: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
-//   email: Type.String({
-//     pattern: "^[a-z]+@[a-z]+[.][a-z]+$",
-//     minLength: 10,
-//     default: "username@example.com",
-//   }),
-//   agree: Type.Boolean({ default: true }),
-// });
+const unionOfUnionsSchema = Type.Object({
+  required: Type.Union([
+    Type.Union([Type.Literal("foo"), Type.Literal("bar")]),
+    Type.Union([Type.Literal("boo"), Type.Literal("baz")]),
+  ]),
+  nullable1: Type.Union([
+    Type.Union([Type.Literal("foo"), Type.Literal("bar")]),
+    Type.Union([Type.Literal("boo"), Type.Literal("baz")]),
+    Type.Null(),
+  ]),
+  nullable2: Type.Union([
+    Type.Union([Type.Literal("foo"), Type.Literal("bar"), Type.Null()]),
+    Type.Union([Type.Literal("boo"), Type.Literal("baz")]),
+  ]),
+});
+
+const dateSchema = Type.Object({
+  required: Type.Date(),
+  nullable: Type.Union([Type.Date(), Type.Null()]),
+  optional: Type.Optional(Type.Date()),
+  list: Type.Array(Type.Date()),
+});
+
+const schemaWithDefaults = Type.Object({
+  name: Type.String({ minLength: 2, default: "Jane" }),
+  age: Type.Number({ minimum: 13, default: 50 }),
+  agree: Type.Boolean({ default: true }),
+  union: Type.Union([Type.Literal("abc"), Type.Literal("def")], {
+    default: "def",
+  }),
+  list: Type.Array(Type.String(), { default: ["abc", "def"] }),
+  date: Type.Date({ default: DATE1 }),
+});
 
 interface ValidTestEntry {
   description: string;
@@ -222,6 +243,75 @@ const validTestEntries: ValidTestEntry[] = [
       nullableList: null,
     },
   },
+  {
+    description: "handling unions of unions, no nulls",
+    schema: unionOfUnionsSchema,
+    submitted: {
+      required: "foo",
+      nullable1: "foo",
+      nullable2: "foo",
+    },
+    parsed: null,
+  },
+  {
+    description: "handling unions of unions, with nulls",
+    schema: unionOfUnionsSchema,
+    submitted: {
+      required: "foo",
+      nullable1: null,
+      nullable2: null,
+    },
+    parsed: null,
+  },
+  {
+    description: "handling dates, all values provides",
+    schema: dateSchema,
+    submitted: {
+      required: DATE1,
+      nullable: DATE2,
+      optional: DATE1,
+      list: [DATE1, DATE2],
+    },
+    parsed: null,
+  },
+  {
+    description: "handling dates, edge cases",
+    schema: dateSchema,
+    submitted: {
+      required: DATE1,
+      nullable: null,
+      list: [],
+    },
+    parsed: null,
+  },
+  {
+    description: "explicit assignment of defaults",
+    schema: schemaWithDefaults,
+    submitted: {
+      date: DATE1, // TODO: delete once TypeBox fixes default dates
+    },
+    parsed: {
+      name: "Jane",
+      age: 50,
+      agree: true,
+      union: "def",
+      list: ["abc", "def"],
+      date: DATE1,
+    },
+  },
+  {
+    description: "not using defaults",
+    schema: schemaWithDefaults,
+    submitted: {
+      name: "Fred",
+      age: 60,
+      agree: false,
+      union: "abc",
+      list: ["def"],
+      date: DATE2,
+    },
+    parsed: null,
+  },
 ];
 
 describe("parseFormData()", () => {
@@ -250,16 +340,20 @@ function testValidFormData(entry: ValidTestEntry): void {
   for (const [key, value] of Object.entries(entry.submitted)) {
     if (Array.isArray(value)) {
       for (const item of value) {
-        formData.append(key, item);
+        formData.append(key, toFormValue(item));
       }
     } else if (value !== null && value !== undefined) {
-      formData.append(key, value);
+      formData.append(key, toFormValue(value));
     }
   }
 
   const schemaInfo = getSchemaInfo(entry.schema);
   const parsedData = parseFormData(formData, schemaInfo);
   expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
+}
+
+function toFormValue(value: unknown): string {
+  return value instanceof Date ? value.toISOString() : String(value);
 }
 
 export function ignore(_description: string, _: () => void) {}
