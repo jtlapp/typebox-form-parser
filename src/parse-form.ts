@@ -9,15 +9,19 @@ import {
 } from "./schema-info.js";
 import { JavaScriptType } from "./typebox-types.js";
 
-export function parseFormData<T extends TObject>(
-  formData: FormData,
+export type FieldData = {
+  getAll: (FormData | URLSearchParams)["getAll"];
+};
+
+export function parseFields<T extends TObject>(
+  fieldData: FieldData,
   schemaInfo: SchemaInfo<T>
 ): Static<T> {
   const output: Record<string, unknown> = {};
 
   for (const fieldName of schemaInfo.fieldNames) {
     const fieldInfo = schemaInfo.fields[fieldName];
-    const entries = formData.getAll(fieldName);
+    const entries = fieldData.getAll(fieldName);
     let value: unknown;
 
     if (fieldInfo.fieldType == JavaScriptType.Array) {
@@ -56,13 +60,12 @@ function parseFormEntry(
   fieldType: JavaScriptType,
   fieldInfo: FieldInfo
 ) {
-  if (typeof entry !== "string") {
-    return undefined; // File object, not supported
-  }
-  return parseFormValue(entry, fieldType, fieldInfo);
+  return typeof entry === "string"
+    ? parseFieldValue(entry, fieldType, fieldInfo)
+    : undefined; // file objects are not supported
 }
 
-function parseFormValue(
+function parseFieldValue(
   value: string,
   fieldType: JavaScriptType,
   fieldInfo: FieldInfo
@@ -74,13 +77,13 @@ function parseFormValue(
   } else if (fieldType == JavaScriptType.Number) {
     return parseFloat(value);
   } else if (fieldType == JavaScriptType.Boolean) {
-    // Boolean fields normally only appear in the form when true, but handle
+    // Boolean fields normally only appear in a form when true, but handle
     // case where the client is explicitly setting a "false" or "off" value.
     return value !== "false" && value !== "off";
   } else if (fieldType == JavaScriptType.Date) {
     return new Date(value);
   } else if (fieldType == JavaScriptType.Array) {
-    return parseFormValue(value, fieldInfo.memberType!, fieldInfo);
+    return parseFieldValue(value, fieldInfo.memberType!, fieldInfo);
   } else if (fieldType == JavaScriptType.BigInt) {
     try {
       return BigInt(value);

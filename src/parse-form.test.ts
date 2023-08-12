@@ -1,7 +1,7 @@
 import { Type, type TObject } from "@sinclair/typebox";
 import { describe, expect, test } from "vitest";
 
-import { parseFormData } from "./parse-form.js";
+import { parseFields } from "./parse-form.js";
 import { getSchemaInfo } from "./schema-info.js";
 
 const DATE1 = new Date();
@@ -316,6 +316,19 @@ const validTestEntries: ValidTestEntry[] = [
     },
     parsed: null,
   },
+  // {
+  //   description: "arrays receive as arrays regardless of schema type",
+  //   schema: normalSchema,
+  //   submitted: {
+  //     name: ["Jane", "Fred"],
+  //     nickname: ["Janey", "Freddy"],
+  //     age: [50, 60],
+  //     siblings: [1, 2],
+  //     email: ["abc@def.hij", "klm@nop.qrs"],
+  //     agree: [true, false],
+  //   },
+  //   parsed: null,
+  // },
   {
     description: "errors on unsupported types",
     schema: unsupportedSchema,
@@ -330,7 +343,7 @@ const validTestEntries: ValidTestEntry[] = [
   },
 ];
 
-describe("parseFormData()", () => {
+describe("parseFields()", () => {
   for (const entry of validTestEntries) {
     test(entry.description, () => {
       testValidFormData(entry);
@@ -346,7 +359,7 @@ describe("parseFormData()", () => {
       siblings?: number;
       email: string | null;
       agree: boolean;
-    } = parseFormData({} as FormData, schemaInfo);
+    } = parseFields({} as FormData, schemaInfo);
     return result; // suppress unused variable warning
   });
 });
@@ -365,9 +378,9 @@ function testValidFormData(entry: ValidTestEntry): void {
 
   const schemaInfo = getSchemaInfo(entry.schema);
   if (entry.error) {
-    expect(() => parseFormData(formData, schemaInfo)).toThrow(entry.error);
+    expect(() => parseFields(formData, schemaInfo)).toThrow(entry.error);
   } else {
-    const parsedData = parseFormData(formData, schemaInfo);
+    const parsedData = parseFields(formData, schemaInfo);
     expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
   }
 }
