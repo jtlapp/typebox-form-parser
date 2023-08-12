@@ -1,7 +1,7 @@
 import { Type, type TObject } from "@sinclair/typebox";
 import { describe, expect, test } from "vitest";
 
-import { parseFormData } from "./parse-form-data.js";
+import { parseFormData } from "./parse-form.js";
 import { getSchemaInfo } from "./schema-info.js";
 
 const DATE1 = new Date();
