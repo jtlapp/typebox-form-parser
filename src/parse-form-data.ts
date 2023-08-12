@@ -88,10 +88,6 @@ function parseFormValue(
       return NaN;
     }
   } else {
-    throw Error(
-      `Type '${fieldType}' in ${
-        fieldInfo.fieldName ? "field " + fieldInfo.fieldName : "[array member]"
-      } not supported`
-    );
+    throw Error(`Unsupported field type: ${fieldType}`);
   }
 }

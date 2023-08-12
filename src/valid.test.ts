@@ -89,11 +89,17 @@ const schemaWithDefaults = Type.Object({
   date: Type.Date({ default: DATE1.toISOString() }),
 });
 
+const unsupportedSchema = Type.Object({
+  name: Type.String({ minLength: 2 }),
+  obj: Type.Object({ str: Type.String() }),
+});
+
 interface ValidTestEntry {
   description: string;
   schema: TObject;
   submitted: object;
   parsed: object | null;
+  error?: string;
 }
 
 const validTestEntries: ValidTestEntry[] = [
@@ -310,6 +316,18 @@ const validTestEntries: ValidTestEntry[] = [
     },
     parsed: null,
   },
+  {
+    description: "errors on unsupported types",
+    schema: unsupportedSchema,
+    submitted: {
+      name: "Jane",
+      obj: {
+        str: "foo",
+      },
+    },
+    parsed: null,
+    error: "object",
+  },
 ];
 
 describe("parseFormData()", () => {
@@ -346,8 +364,12 @@ function testValidFormData(entry: ValidTestEntry): void {
   }
 
   const schemaInfo = getSchemaInfo(entry.schema);
-  const parsedData = parseFormData(formData, schemaInfo);
-  expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
+  if (entry.error) {
+    expect(() => parseFormData(formData, schemaInfo)).toThrow(entry.error);
+  } else {
+    const parsedData = parseFormData(formData, schemaInfo);
+    expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
+  }
 }
 
 function toFormValue(value: unknown): string {
