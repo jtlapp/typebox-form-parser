@@ -24,26 +24,23 @@ export function parseFormFields<T extends TObject>(
     const entries = fieldData.getAll(fieldName);
     let value: unknown;
 
-    if (fieldInfo.fieldType == JavaScriptType.Array) {
-      if (entries.length !== 0) {
-        value = entries.map((entry) =>
-          parseField(entry, fieldInfo.memberType!, fieldInfo)
-        );
-      } else if (
-        !fieldInfo.isOptional &&
-        !fieldInfo.isNullable &&
-        !fieldInfo.hasDefault
-      ) {
-        // TODO: Is it even possible for a form to specify this?
-        //  Shouldn't missing arrays actually only validate as optional?
-        value = [];
-      }
-    } else {
-      // TODO: provided arrays need to be parsed as arrays
+    // TODO: empty strings are not expressible
+    if (entries.length === 1) {
       const entry = entries[0];
-      if (entry !== "" && entry !== undefined) {
+      if (entry !== "") {
         value = parseField(entry, fieldInfo.fieldType, fieldInfo);
+        if (fieldInfo.fieldType == JavaScriptType.Array) {
+          value = [value];
+        }
       }
+    } else if (entries.length !== 0) {
+      value = entries.map((entry) =>
+        parseField(
+          entry,
+          fieldInfo.memberType ?? fieldInfo.fieldType,
+          fieldInfo
+        )
+      );
     }
     if (value === undefined) {
       value = fieldInfo.hasDefault

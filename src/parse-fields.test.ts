@@ -95,6 +95,7 @@ const unsupportedSchema = Type.Object({
 });
 
 interface ValidTestEntry {
+  only?: boolean;
   description: string;
   schema: TObject;
   submitted: object;
@@ -210,7 +211,6 @@ const validTestEntries: ValidTestEntry[] = [
       bigints: null,
     },
     parsed: {
-      strings: [],
       ints: [123],
       bigints: null,
     },
@@ -245,7 +245,6 @@ const validTestEntries: ValidTestEntry[] = [
       nullableList: null,
     },
     parsed: {
-      requiredList: [],
       nullableList: null,
     },
   },
@@ -288,7 +287,10 @@ const validTestEntries: ValidTestEntry[] = [
       nullable: null,
       list: [],
     },
-    parsed: null,
+    parsed: {
+      required: DATE1,
+      nullable: null,
+    },
   },
   {
     description: "explicit assignment of defaults",
@@ -316,19 +318,19 @@ const validTestEntries: ValidTestEntry[] = [
     },
     parsed: null,
   },
-  // {
-  //   description: "arrays receive as arrays regardless of schema type",
-  //   schema: normalSchema,
-  //   submitted: {
-  //     name: ["Jane", "Fred"],
-  //     nickname: ["Janey", "Freddy"],
-  //     age: [50, 60],
-  //     siblings: [1, 2],
-  //     email: ["abc@def.hij", "klm@nop.qrs"],
-  //     agree: [true, false],
-  //   },
-  //   parsed: null,
-  // },
+  {
+    description: "arrays receive as arrays regardless of schema type",
+    schema: normalSchema,
+    submitted: {
+      name: ["Jane", "Fred"],
+      nickname: ["Janey", "Freddy"],
+      age: [50, 60],
+      siblings: [1, 2],
+      email: ["abc@def.hij", "klm@nop.qrs"],
+      agree: [true, false],
+    },
+    parsed: null,
+  },
   {
     description: "errors on unsupported types",
     schema: unsupportedSchema,
@@ -345,9 +347,11 @@ const validTestEntries: ValidTestEntry[] = [
 
 describe("parseFormFields()", () => {
   for (const entry of validTestEntries) {
-    test(entry.description, () => {
-      testValidFormData(entry);
-    });
+    if (entry.only) {
+      test.only(entry.description, () => testValidFormData(entry));
+    } else {
+      test(entry.description, () => testValidFormData(entry));
+    }
   }
 
   ignore("verify result type", () => {
