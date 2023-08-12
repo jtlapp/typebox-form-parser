@@ -104,7 +104,7 @@ function createFieldInfo(
   }
 
   if (isNullable || isOptional) {
-    if (typeBoxType === TypeBoxType.Boolean) {
+    if (fieldType == JavaScriptType.Boolean) {
       throw Error("Form booleans (checkboxes) can't be nullable or optional");
     }
     if (hasDefault) {
