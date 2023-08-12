@@ -1,7 +1,7 @@
 import { Type, type TObject } from "@sinclair/typebox";
 import { describe, expect, test } from "vitest";
 
-import { parseFields } from "./parse-form.js";
+import { parseFormFields } from "./parse-fields.js";
 import { getSchemaInfo } from "./schema-info.js";
 
 const DATE1 = new Date();
@@ -343,7 +343,7 @@ const validTestEntries: ValidTestEntry[] = [
   },
 ];
 
-describe("parseFields()", () => {
+describe("parseFormFields()", () => {
   for (const entry of validTestEntries) {
     test(entry.description, () => {
       testValidFormData(entry);
@@ -359,7 +359,7 @@ describe("parseFields()", () => {
       siblings?: number;
       email: string | null;
       agree: boolean;
-    } = parseFields({} as FormData, schemaInfo);
+    } = parseFormFields({} as FormData, schemaInfo);
     return result; // suppress unused variable warning
   });
 });
@@ -378,9 +378,9 @@ function testValidFormData(entry: ValidTestEntry): void {
 
   const schemaInfo = getSchemaInfo(entry.schema);
   if (entry.error) {
-    expect(() => parseFields(formData, schemaInfo)).toThrow(entry.error);
+    expect(() => parseFormFields(formData, schemaInfo)).toThrow(entry.error);
   } else {
-    const parsedData = parseFields(formData, schemaInfo);
+    const parsedData = parseFormFields(formData, schemaInfo);
     expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
   }
 }

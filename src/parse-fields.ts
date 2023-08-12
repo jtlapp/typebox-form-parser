@@ -13,7 +13,7 @@ export type FieldData = {
   getAll: (FormData | URLSearchParams)["getAll"];
 };
 
-export function parseFields<T extends TObject>(
+export function parseFormFields<T extends TObject>(
   fieldData: FieldData,
   schemaInfo: SchemaInfo<T>
 ): Static<T> {
@@ -27,19 +27,22 @@ export function parseFields<T extends TObject>(
     if (fieldInfo.fieldType == JavaScriptType.Array) {
       if (entries.length !== 0) {
         value = entries.map((entry) =>
-          parseFormEntry(entry, fieldInfo.memberType!, fieldInfo)
+          parseField(entry, fieldInfo.memberType!, fieldInfo)
         );
       } else if (
         !fieldInfo.isOptional &&
         !fieldInfo.isNullable &&
         !fieldInfo.hasDefault
       ) {
+        // TODO: Is it even possible for a form to specify this?
+        //  Shouldn't missing arrays actually only validate as optional?
         value = [];
       }
     } else {
+      // TODO: provided arrays need to be parsed as arrays
       const entry = entries[0];
       if (entry !== "" && entry !== undefined) {
-        value = parseFormEntry(entry, fieldInfo.fieldType, fieldInfo);
+        value = parseField(entry, fieldInfo.fieldType, fieldInfo);
       }
     }
     if (value === undefined) {
@@ -55,17 +58,17 @@ export function parseFields<T extends TObject>(
   return output;
 }
 
-function parseFormEntry(
+function parseField(
   entry: FormDataEntryValue,
   fieldType: JavaScriptType,
   fieldInfo: FieldInfo
 ) {
   return typeof entry === "string"
-    ? parseFieldValue(entry, fieldType, fieldInfo)
+    ? parseStringValue(entry, fieldType, fieldInfo)
     : undefined; // file objects are not supported
 }
 
-function parseFieldValue(
+function parseStringValue(
   value: string,
   fieldType: JavaScriptType,
   fieldInfo: FieldInfo
@@ -83,7 +86,7 @@ function parseFieldValue(
   } else if (fieldType == JavaScriptType.Date) {
     return new Date(value);
   } else if (fieldType == JavaScriptType.Array) {
-    return parseFieldValue(value, fieldInfo.memberType!, fieldInfo);
+    return parseStringValue(value, fieldInfo.memberType!, fieldInfo);
   } else if (fieldType == JavaScriptType.BigInt) {
     try {
       return BigInt(value);
