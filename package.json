@@ -1,12 +1,12 @@
 {
-  "name": "typebox-form-fields",
+  "name": "typebox-form-parser",
   "version": "0.1.0",
   "author": "Joseph T. Lapp <arachnojoe@gmail.com>",
   "license": "MIT",
   "description": "Parses form and query parameter data based on TypeBox schemas",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jtlapp/typebox-form-fields"
+    "url": "https://github.com/jtlapp/typebox-form-parser"
   },
   "keywords": [
     "typebox",
