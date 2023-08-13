@@ -21,28 +21,20 @@ export function parseFormFields<T extends TObject>(
 
   for (const fieldName of schemaInfo.fieldNames) {
     const fieldInfo = schemaInfo.fields[fieldName];
+    const fieldType = fieldInfo.fieldType;
     const entries = fieldData.getAll(fieldName);
     let value: unknown;
 
-    // TODO: empty strings are not expressible
     if (entries.length === 1) {
-      const entry = entries[0];
-      if (entry !== "") {
-        value = parseField(entry, fieldInfo.fieldType, fieldInfo);
-        if (fieldInfo.fieldType == JavaScriptType.Array) {
-          value = [value];
-        }
+      value = parseField(entries[0], fieldInfo.fieldType, fieldInfo);
+      if (fieldInfo.fieldType == JavaScriptType.Array) {
+        value = [value];
       }
     } else if (entries.length !== 0) {
       value = entries.map((entry) =>
-        parseField(
-          entry,
-          fieldInfo.memberType ?? fieldInfo.fieldType,
-          fieldInfo
-        )
+        parseField(entry, fieldInfo.memberType ?? fieldType, fieldInfo)
       );
-    }
-    if (value === undefined) {
+    } else {
       value = fieldInfo.hasDefault
         ? fieldInfo.defaultValue
         : defaultValueForType(fieldInfo);
@@ -70,6 +62,13 @@ function parseStringValue(
   fieldType: JavaScriptType,
   fieldInfo: FieldInfo
 ): unknown {
+  if (value === "") {
+    if (fieldInfo.isNullable) {
+      return null;
+    } else if (fieldInfo.hasDefault) {
+      return fieldInfo.defaultValue;
+    }
+  }
   if (fieldType == JavaScriptType.String) {
     return value;
   } else if (fieldType == JavaScriptType.Integer) {
@@ -79,7 +78,7 @@ function parseStringValue(
   } else if (fieldType == JavaScriptType.Boolean) {
     // Boolean fields normally only appear in a form when true, but handle
     // case where the client is explicitly setting a "false" or "off" value.
-    return value !== "false" && value !== "off";
+    return !["", "false", "off"].includes(value);
   } else if (fieldType == JavaScriptType.Date) {
     return new Date(value);
   } else if (fieldType == JavaScriptType.Array) {

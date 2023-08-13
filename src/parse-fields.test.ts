@@ -319,6 +319,58 @@ const validTestEntries: ValidTestEntry[] = [
     parsed: null,
   },
   {
+    description: "non-array empty string handling",
+    schema: normalSchema,
+    submitted: {
+      name: "",
+      nickname: "",
+      age: "",
+      siblings: "",
+      email: "",
+      agree: "",
+    },
+    parsed: {
+      name: "",
+      nickname: "",
+      age: NaN,
+      siblings: NaN,
+      email: null,
+      agree: false,
+    },
+  },
+  {
+    description: "arrays of one empty string handling",
+    schema: arraySchema,
+    submitted: {
+      strings: [""],
+      ints: [""],
+      bools: [""],
+      bigints: [""],
+    },
+    parsed: {
+      strings: [""],
+      ints: [NaN],
+      bools: [false],
+      bigints: [null],
+    },
+  },
+  {
+    description: "arrays of multiple empty strings handling",
+    schema: arraySchema,
+    submitted: {
+      strings: ["", ""],
+      ints: ["", "", 1],
+      bools: ["", "", true],
+      bigints: ["", ""],
+    },
+    parsed: {
+      strings: ["", ""],
+      ints: [NaN, NaN, 1],
+      bools: [false, false, true],
+      bigints: [null, null],
+    },
+  },
+  {
     description: "arrays receive as arrays regardless of schema type",
     schema: normalSchema,
     submitted: {
@@ -345,12 +397,12 @@ const validTestEntries: ValidTestEntry[] = [
   },
 ];
 
-describe("parseFormFields()", () => {
+describe("parse form data", () => {
   for (const entry of validTestEntries) {
     if (entry.only) {
-      test.only(entry.description, () => testValidFormData(entry));
+      test.only(entry.description, () => testFormData(entry));
     } else {
-      test(entry.description, () => testValidFormData(entry));
+      test(entry.description, () => testFormData(entry));
     }
   }
 
@@ -368,7 +420,19 @@ describe("parseFormFields()", () => {
   });
 });
 
-function testValidFormData(entry: ValidTestEntry): void {
+// TODO: uncomment
+
+// describe("parse query params", () => {
+//   for (const entry of validTestEntries) {
+//     if (entry.only) {
+//       test.only(entry.description, () => testQueryParams(entry));
+//     } else {
+//       test(entry.description, () => testQueryParams(entry));
+//     }
+//   }
+// });
+
+function testFormData(entry: ValidTestEntry): void {
   const formData = new FormData();
   for (const [key, value] of Object.entries(entry.submitted)) {
     if (Array.isArray(value)) {
@@ -388,6 +452,27 @@ function testValidFormData(entry: ValidTestEntry): void {
     expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
   }
 }
+
+// function testQueryParams(entry: ValidTestEntry): void {
+//   const queryParams = new URLSearchParams();
+//   for (const [key, value] of Object.entries(entry.submitted)) {
+//     if (Array.isArray(value)) {
+//       for (const item of value) {
+//         queryParams.append(key, toFormValue(item));
+//       }
+//     } else if (value !== null && value !== undefined) {
+//       queryParams.append(key, toFormValue(value));
+//     }
+//   }
+
+//   const schemaInfo = getSchemaInfo(entry.schema);
+//   if (entry.error) {
+//     expect(() => parseFormFields(queryParams, schemaInfo)).toThrow(entry.error);
+//   } else {
+//     const parsedData = parseFormFields(queryParams, schemaInfo);
+//     expect(parsedData).toEqual(entry.parsed ?? entry.submitted);
+//   }
+// }
 
 function toFormValue(value: unknown): string {
   return value instanceof Date ? value.toISOString() : String(value);
