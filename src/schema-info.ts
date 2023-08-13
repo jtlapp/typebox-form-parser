@@ -65,8 +65,6 @@ export function getDefaultValue(fieldInfo: FieldInfo): unknown {
     ? fieldInfo.defaultValue
     : fieldInfo.isNullable
     ? null
-    : fieldInfo.fieldType == JavaScriptType.Boolean
-    ? false
     : undefined;
 }
 
@@ -104,9 +102,6 @@ function createFieldInfo(
   }
 
   if (isNullable || isOptional) {
-    if (fieldType == JavaScriptType.Boolean) {
-      throw Error("Form booleans (checkboxes) can't be nullable or optional");
-    }
     if (hasDefault) {
       throw Error("Optional and nullable form types can't have default values");
     }

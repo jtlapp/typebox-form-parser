@@ -3,14 +3,6 @@ import { describe, expect, test } from "vitest";
 
 import { getSchemaInfo } from "./schema-info.js";
 
-const badNullableBooleanSchema = Type.Object({
-  flag: Type.Union([Type.Boolean(), Type.Null()]),
-});
-
-const badOptionalBooleanSchema = Type.Object({
-  flag: Type.Optional(Type.Boolean()),
-});
-
 const badNullableWithDefaultSchema = Type.Object({
   str: Type.Union([Type.String(), Type.Null()], { default: "foo" }),
 });
@@ -55,16 +47,6 @@ interface InvalidTestEntry {
 }
 
 const invalidTestEntries: InvalidTestEntry[] = [
-  {
-    description: "handling an invalid nullable boolean",
-    schema: badNullableBooleanSchema,
-    error: "Form booleans (checkboxes) can't be nullable or optional",
-  },
-  {
-    description: "handling an invalid optional boolean",
-    schema: badOptionalBooleanSchema,
-    error: "Form booleans (checkboxes) can't be nullable or optional",
-  },
   {
     description: "handling an invalid nullable with default",
     schema: badNullableWithDefaultSchema,

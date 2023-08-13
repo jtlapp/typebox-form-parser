@@ -16,7 +16,6 @@ Parses form and query parameter data based on TypeBox schemas
 - Nullable string values are never empty strings.
 - Arrays can't have nullable or optional members.
 - Empty arrays are not expressible; arrays are either received having at least one member, or no array is received at all. To support an empty array, make the array optional.
-- Booleans cannot be optional or nullable; they always evaluate to either `true` or `false`.
-- The boolean form values `"false"`, `"off"`, and empty string are interpreted as `false`; all other values are interpreted as `true`. The absence of a form value for a boolean is interpreted as `false`, unless the schema overrides with a default value.
+- The boolean form values `"false"`, `"off"`, and empty string are interpreted as `false`; all other non-empty string values are interpreted as `true`.
 - Numeric, date, and string values only have defaults when the schema provides them.
 - Default dates must be represented as strings, because TypeBox conforms to JSON schema. Use ISO strings for preserve accuracy.

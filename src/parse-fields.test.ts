@@ -26,6 +26,14 @@ const booleanSchema = Type.Object({
   agree: Type.Boolean(),
 });
 
+const nullableBooleanSchema = Type.Object({
+  flag: Type.Union([Type.Boolean(), Type.Null()]),
+});
+
+const optionalBooleanSchema = Type.Object({
+  flag: Type.Optional(Type.Boolean()),
+});
+
 const arraySchema = Type.Object({
   strings: Type.Array(Type.String()),
   ints: Type.Array(Type.Integer()),
@@ -129,7 +137,7 @@ const validTestEntries: ValidTestEntry[] = [
     parsed: null,
   },
   {
-    description: "booleans/nullables default to false/null",
+    description: "nullables default to null",
     schema: normalSchema,
     submitted: {
       name: "Jane",
@@ -139,7 +147,6 @@ const validTestEntries: ValidTestEntry[] = [
       name: "Jane",
       age: 50,
       email: null,
-      agree: false,
     },
   },
   {
@@ -158,7 +165,6 @@ const validTestEntries: ValidTestEntry[] = [
       age: NaN,
       siblings: NaN,
       email: "456",
-      agree: false,
     },
   },
   {
@@ -190,6 +196,40 @@ const validTestEntries: ValidTestEntry[] = [
     parsed: {
       agree: false,
     },
+  },
+  {
+    description: "detect 'false' for a nullable boolean",
+    schema: nullableBooleanSchema,
+    submitted: {
+      flag: "false",
+    },
+    parsed: {
+      flag: false,
+    },
+  },
+  {
+    description: "detect null for a nullable boolean",
+    schema: nullableBooleanSchema,
+    submitted: {},
+    parsed: {
+      flag: null,
+    },
+  },
+  {
+    description: "detect 'off' for an optional boolean",
+    schema: optionalBooleanSchema,
+    submitted: {
+      flag: "off",
+    },
+    parsed: {
+      flag: false,
+    },
+  },
+  {
+    description: "receive nothing for a optional boolean",
+    schema: optionalBooleanSchema,
+    submitted: {},
+    parsed: {},
   },
   {
     description: "duplicate field handling (arrays)",
