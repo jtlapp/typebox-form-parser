@@ -46,9 +46,7 @@ export function getSchemaInfo<T extends TSchema>(schema: T): SchemaInfo<T> {
     const defaultObject: Record<string, unknown> = {};
     for (const fieldName of fieldNames) {
       const fieldInfo = fields[fieldName];
-      defaultObject[fieldName] = fieldInfo.hasDefault
-        ? fieldInfo.defaultValue
-        : defaultValueForType(fieldInfo);
+      defaultObject[fieldName] = getDefaultValue(fieldInfo);
     }
 
     schemaInfo = {
@@ -62,8 +60,10 @@ export function getSchemaInfo<T extends TSchema>(schema: T): SchemaInfo<T> {
   return schemaInfo;
 }
 
-export function defaultValueForType(fieldInfo: FieldInfo): unknown {
-  return fieldInfo.isNullable
+export function getDefaultValue(fieldInfo: FieldInfo): unknown {
+  return fieldInfo.hasDefault
+    ? fieldInfo.defaultValue
+    : fieldInfo.isNullable
     ? null
     : fieldInfo.fieldType == JavaScriptType.Boolean
     ? false

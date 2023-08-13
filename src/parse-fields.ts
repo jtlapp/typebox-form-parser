@@ -3,7 +3,7 @@
 import type { Static, TObject } from "@sinclair/typebox";
 
 import {
-  defaultValueForType,
+  getDefaultValue,
   type FieldInfo,
   type SchemaInfo,
 } from "./schema-info.js";
@@ -35,9 +35,7 @@ export function parseFormFields<T extends TObject>(
         parseField(entry, fieldInfo.memberType ?? fieldType, fieldInfo)
       );
     } else {
-      value = fieldInfo.hasDefault
-        ? fieldInfo.defaultValue
-        : defaultValueForType(fieldInfo);
+      value = getDefaultValue(fieldInfo);
     }
     if (value !== undefined) {
       output[fieldName] = value;
@@ -76,8 +74,6 @@ function parseStringValue(
   } else if (fieldType == JavaScriptType.Number) {
     return parseFloat(value);
   } else if (fieldType == JavaScriptType.Boolean) {
-    // Boolean fields normally only appear in a form when true, but handle
-    // case where the client is explicitly setting a "false" or "off" value.
     return !["", "false", "off"].includes(value);
   } else if (fieldType == JavaScriptType.Date) {
     return new Date(value);
