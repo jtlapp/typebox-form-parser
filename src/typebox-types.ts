@@ -1,3 +1,6 @@
+/**
+ * TypeBox types, stored in a schema's `Kind` symbol property.
+ */
 export enum TypeBoxType {
   Array = "Array",
   BigInt = "BigInt",
@@ -16,6 +19,9 @@ export enum TypeBoxType {
   Union = "Union",
 }
 
+/**
+ * JavaScript types to which TypeBox types correspond.
+ */
 export enum JavaScriptType {
   Array = "array",
   BigInt = "bigint",

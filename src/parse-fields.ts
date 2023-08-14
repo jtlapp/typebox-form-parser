@@ -9,10 +9,21 @@ import {
 } from "./schema-info.js";
 import { JavaScriptType } from "./typebox-types.js";
 
+/**
+ * An interface to the HTTP request data, abstracting both FormData
+ * and URLSearchParams.
+ */
 export type FieldData = {
   getAll: (FormData | URLSearchParams)["getAll"];
 };
 
+/**
+ * Parses HTTP form data or query parameters into a JavaScript object that
+ * conforms as closely as possible to a TypeBox schema.
+ * @param fieldData The HTTP form data or query parameters.
+ * @param schemaInfo Information about the schema used to parse the data.
+ * @returns The parsed data, always taking the form of an object.
+ */
 export function parseFormFields<T extends TObject>(
   fieldData: FieldData,
   schemaInfo: SchemaInfo<T>

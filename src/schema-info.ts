@@ -1,10 +1,20 @@
 // inspired by https://github.com/ciscoheat/sveltekit-superforms/blob/main/src/lib/schemaEntity.ts
 
-import type { TArray, TLiteral, TSchema, TUnion } from "@sinclair/typebox";
+import type {
+  TArray,
+  TLiteral,
+  TObject,
+  TSchema,
+  TUnion,
+} from "@sinclair/typebox";
 import { Kind, Optional } from "@sinclair/typebox";
 
 import { JavaScriptType, TypeBoxType } from "./typebox-types.js";
 
+/**
+ * Information about a TypeBox schema that's cached to improve the
+ * performance of `parseFormFields()`.
+ */
 export interface SchemaInfo<T extends TSchema> {
   schema: T;
   fieldNames: string[];
@@ -12,6 +22,10 @@ export interface SchemaInfo<T extends TSchema> {
   defaultObject: Record<string, unknown>;
 }
 
+/**
+ * Information about a property of a TypeBox schema that's cached to
+ * improve the performance of `parseFormFields()`.
+ */
 export interface FieldInfo {
   fieldName: string | null; // null for array and union members
   fieldType: JavaScriptType;
@@ -24,12 +38,13 @@ export interface FieldInfo {
 
 let schemaToInfoMap = new WeakMap<TSchema, SchemaInfo<TSchema>>();
 
-export function resetSchemaInfoCache() {
-  // useful for testing
-  schemaToInfoMap = new WeakMap<TSchema, SchemaInfo<TSchema>>();
-}
-
-export function getSchemaInfo<T extends TSchema>(schema: T): SchemaInfo<T> {
+/**
+ * Extracts the information from a TypeBox schema needed to parse form data
+ * and query parameters, caching the information to improve performance.
+ * @param schema A TypeBox schema defining an object.
+ * @returns Cached information about the schema.
+ */
+export function getSchemaInfo<T extends TObject>(schema: T): SchemaInfo<T> {
   let schemaInfo = schemaToInfoMap.get(schema) as SchemaInfo<T> | undefined;
   if (schemaInfo === undefined) {
     const fieldNames = Object.keys(schema.properties);
@@ -58,6 +73,14 @@ export function getSchemaInfo<T extends TSchema>(schema: T): SchemaInfo<T> {
     schemaToInfoMap.set(schema, schemaInfo);
   }
   return schemaInfo;
+}
+
+/**
+ * Clears the cache of schema information. This is useful for testing.
+ */
+export function clearSchemaInfoCache() {
+  // useful for testing
+  schemaToInfoMap = new WeakMap<TSchema, SchemaInfo<TSchema>>();
 }
 
 export function getDefaultValue(fieldInfo: FieldInfo): unknown {

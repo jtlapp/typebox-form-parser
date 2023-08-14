@@ -34,12 +34,15 @@
   },
   "scripts": {
     "build": "rm -rdf dist && tsc && tsc -p tsconfig.cjs.json && pnpm write-packages",
+    "build-docs": "typedoc --options ./typedoc.cjs ./src/index.ts",
+    "build-all": "npm run build && npm run build-docs",
     "write-packages": "echo '{\"type\":\"module\"}' > dist/esm/package.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
     "clean": "rm -rdf dist && rm -rdf node_modules",
     "test": "vitest --run"
   },
   "devDependencies": {
     "@types/node": "20.1.3",
+    "typedoc": "^0.24.8",
     "typescript": "5.1.3",
     "vite": "^4.3.6",
     "vitest": "^0.32.2"
