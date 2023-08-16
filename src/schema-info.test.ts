@@ -1,9 +1,13 @@
 import { type TObject, Type } from "@sinclair/typebox";
 import { describe, expect, test } from "vitest";
 
-import { type SchemaInfo, getSchemaInfo } from "./schema-info.js";
+import {
+  type SchemaInfo,
+  getSchemaInfo,
+  clearSchemaInfoCache,
+} from "./schema-info.js";
 
-const goodSchema = Type.Object({
+const goodSchema1 = Type.Object({
   name: Type.String({ minLength: 2 }),
   nickname: Type.Optional(Type.String({ minLength: 2 })),
   age: Type.Number({ minimum: 13 }),
@@ -20,6 +24,10 @@ const goodSchema = Type.Object({
   ints: Type.Array(Type.Integer()),
   bools: Type.Optional(Type.Array(Type.Boolean())),
   bigints: Type.Union([Type.Array(Type.BigInt()), Type.Null()]),
+});
+
+const goodSchema2 = Type.Object({
+  name: Type.String({ minLength: 2 }),
 });
 
 const badNullableWithDefaultSchema = Type.Object({
@@ -117,9 +125,9 @@ const invalidTestEntries: InvalidTestEntry[] = [
 
 describe("allowed schemas", () => {
   test("caching a good schema", () => {
-    const info = getSchemaInfo(goodSchema);
+    const info = getSchemaInfo(goodSchema1);
     expect(info).toEqual({
-      schema: goodSchema,
+      schema: goodSchema1,
       fieldNames: [
         "name",
         "nickname",
@@ -239,16 +247,33 @@ describe("allowed schemas", () => {
     });
   });
 
-  test("extending a good schema", () => {
-    const info: SchemaInfo<TObject> & { extra: string } = getSchemaInfo(
-      goodSchema,
+  test("extending a good schema and clearing schemas", () => {
+    // verify that we can extend the schema information
+
+    let info1: SchemaInfo<TObject> & { extra: string } = getSchemaInfo(
+      goodSchema2,
       (schemaInfo) => ({
         ...schemaInfo,
         extra: "extra",
       })
     );
-    expect(info.schema).toEqual(goodSchema);
-    expect(info.extra).toEqual("extra");
+    expect(info1.schema).toEqual(goodSchema2);
+    expect(info1.extra).toEqual("extra");
+
+    // verify that we can clear the schema information cache
+
+    clearSchemaInfoCache();
+    const info2 = getSchemaInfo(goodSchema2);
+    expect((info2 as any).extra).toBeUndefined();
+
+    // verify that we're indeed pulling the schema info from cache
+
+    info1 = getSchemaInfo(goodSchema2, (schemaInfo) => ({
+      ...schemaInfo,
+      extra: "extra",
+    }));
+    expect(info1.schema).toEqual(goodSchema2);
+    expect(info1.extra).toBeUndefined();
   });
 });
 

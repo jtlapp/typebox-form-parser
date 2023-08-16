@@ -75,9 +75,12 @@ export function getSchemaInfo<T extends TObject, U extends SchemaInfo<T>>(
       fields,
       defaultObject,
     };
+    if (extend !== undefined) {
+      schemaInfo = extend(schemaInfo);
+    }
     schemaToInfoMap.set(schema, schemaInfo);
   }
-  return extend === undefined ? (schemaInfo as U) : extend(schemaInfo);
+  return schemaInfo as U;
 }
 
 /**
