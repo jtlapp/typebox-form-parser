@@ -71,7 +71,7 @@ const appSchemaInfo = getSchemaInfo(schema, (schemaInfo) => {
 });
 ```
 
-You can add any number of properties to the schema, with names of your choosing.
+Add any number of properties to the schema, with names of your choosing.
 
 ## Schema Constraints
 
