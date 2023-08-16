@@ -42,9 +42,14 @@ let schemaToInfoMap = new WeakMap<TSchema, SchemaInfo<TSchema>>();
  * Extracts the information from a TypeBox schema needed to parse form data
  * and query parameters, caching the information to improve performance.
  * @param schema A TypeBox schema defining an object.
+ * @param modify A function that can extend the cached schema information
+ *  with additional information needed by the application.
  * @returns Cached information about the schema.
  */
-export function getSchemaInfo<T extends TObject>(schema: T): SchemaInfo<T> {
+export function getSchemaInfo<T extends TObject, U extends SchemaInfo<T>>(
+  schema: T,
+  extend?: (schemaInfo: SchemaInfo<T>) => U
+): U {
   let schemaInfo = schemaToInfoMap.get(schema) as SchemaInfo<T> | undefined;
   if (schemaInfo === undefined) {
     const fieldNames = Object.keys(schema.properties);
@@ -72,7 +77,7 @@ export function getSchemaInfo<T extends TObject>(schema: T): SchemaInfo<T> {
     };
     schemaToInfoMap.set(schema, schemaInfo);
   }
-  return schemaInfo;
+  return extend === undefined ? (schemaInfo as U) : extend(schemaInfo);
 }
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "typebox-form-parser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Joseph T. Lapp <arachnojoe@gmail.com>",
   "license": "MIT",
   "description": "Parses form and query parameter data based on TypeBox schemas",
