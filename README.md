@@ -59,6 +59,18 @@ function handlePost(request: Request) {
 }
 ```
 
+You can also attach application-specific information to the cached schema information:
+
+```ts
+const appSchemaInfo = getSchemaInfo(schema, (schemaInfo) => {
+  // derive `constraints` from schemaInfo.schema
+  return {
+    ...schemaInfo,
+    constraints,
+  };
+});
+```
+
 ## Schema Constraints
 
 From data and query parameters have limited ability to express data. This library employs the following constraints:
@@ -80,3 +92,7 @@ From data and query parameters have limited ability to express data. This librar
 ## License
 
 MIT License. Copyright &copy; 2023 Joseph T. Lapp
+
+```
+
+```
