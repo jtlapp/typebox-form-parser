@@ -63,13 +63,15 @@ You can also attach application-specific information to the cached schema inform
 
 ```ts
 const appSchemaInfo = getSchemaInfo(schema, (schemaInfo) => {
-  // derive `constraints` from schemaInfo.schema
+  // derive `extra` from schemaInfo.schema
   return {
     ...schemaInfo,
-    constraints,
+    extra,
   };
 });
 ```
+
+You can add any number of properties to the schema, with names of your choosing.
 
 ## Schema Constraints
 
