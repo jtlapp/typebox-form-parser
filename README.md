@@ -94,7 +94,3 @@ From data and query parameters have limited ability to express data. This librar
 ## License
 
 MIT License. Copyright &copy; 2023 Joseph T. Lapp
-
-```
-
-```
