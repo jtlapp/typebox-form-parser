@@ -6,7 +6,7 @@ Parses form and query parameter data based on TypeBox schemas
 
 ## Introduction
 
-This library interprets HTTP form data and query parameters as objects defined by [TypeBox](https://github.com/sinclairzx81/typebox) schemas. Given a TypeBox schema and either an instance of [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) or [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams), the library parses the data as an instance of the schema to the degree that it is able, without also validating the data. To validate the resulting parsed data, call TypeBox's [check function](https://github.com/sinclairzx81/typebox#values-check) or [errors function](https://github.com/sinclairzx81/typebox#errors), or use a [TypeBox validator](https://github.com/jtlapp/typebox-validators).
+This library interprets HTTP form data and query parameters as objects defined by [TypeBox](https://github.com/sinclairzx81/typebox) schemas. Given a TypeBox schema and either an instance of [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) or [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams), the library parses the data as an instance of the schema to the degree that it is able, without also validating the data. To validate the resulting parsed data, pass it to TypeBox's [check function](https://github.com/sinclairzx81/typebox#values-check) or [errors function](https://github.com/sinclairzx81/typebox#errors), or use a [TypeBox validator](https://github.com/jtlapp/typebox-validators).
 
 ## Installation
 
